@@ -1,0 +1,46 @@
+# SDLCraft CLI - Git Ignore
+
+# CLI (Go)
+cli/sdlc
+cli/*.exe
+cli/*.test
+cli/*.out
+cli/vendor/
+
+# Backend (Java/Maven)
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/.settings/
+backend/.classpath
+backend/.project
+backend/.factorypath
+backend/bin/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Database
+*.db
+*.sqlite
+
+# Temporary files
+tmp/
+temp/
