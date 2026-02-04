@@ -276,3 +276,39 @@ func (c *HTTPBackendClient) Close() error {
 	// HTTP client doesn't need explicit closing
 	return nil
 }
+
+// SimpleClient provides a simplified interface for making API calls.
+type SimpleClient struct {
+	baseURL    string
+	httpClient *http.Client
+}
+
+// New creates a new SimpleClient with default settings.
+func New() *SimpleClient {
+	return &SimpleClient{
+		baseURL:    "http://localhost:8080",
+		httpClient: &http.Client{Timeout: 120 * time.Second},
+	}
+}
+
+// Get makes a GET request to the backend.
+func (c *SimpleClient) Get(path string) ([]byte, error) {
+	url := c.baseURL + path
+	resp, err := c.httpClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return io.ReadAll(resp.Body)
+}
+
+// Post makes a POST request to the backend.
+func (c *SimpleClient) Post(path string, body []byte) ([]byte, error) {
+	url := c.baseURL + path
+	resp, err := c.httpClient.Post(url, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return io.ReadAll(resp.Body)
+}

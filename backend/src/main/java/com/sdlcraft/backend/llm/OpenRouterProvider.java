@@ -3,7 +3,7 @@ package com.sdlcraft.backend.llm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,7 +20,7 @@ import java.util.Map;
  * OpenRouter provides access to multiple AI models through a unified API.
  */
 @Component
-@Primary
+@ConditionalOnProperty(name = "sdlcraft.llm.provider", havingValue = "openrouter", matchIfMissing = true)
 public class OpenRouterProvider implements LLMProvider {
     
     private static final Logger logger = LoggerFactory.getLogger(OpenRouterProvider.class);
