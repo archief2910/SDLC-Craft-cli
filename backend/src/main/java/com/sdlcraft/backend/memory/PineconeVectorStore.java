@@ -26,8 +26,7 @@ import java.util.stream.Collectors;
  * - Namespace support for multi-project isolation
  */
 @Component
-@Primary
-@ConditionalOnProperty(name = "sdlcraft.vector-store.pinecone.api-key")
+@ConditionalOnProperty(name = "sdlcraft.vector-store.pinecone.api-key", havingValue = "true", matchIfMissing = false)
 public class PineconeVectorStore implements VectorStore {
     
     private static final Logger logger = LoggerFactory.getLogger(PineconeVectorStore.class);

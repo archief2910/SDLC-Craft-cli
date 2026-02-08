@@ -2,10 +2,8 @@ package com.sdlcraft.backend.rag;
 
 import com.sdlcraft.backend.llm.LLMException;
 import com.sdlcraft.backend.llm.LLMProvider;
-import com.sdlcraft.backend.memory.CodebaseIndexer;
-import com.sdlcraft.backend.memory.CodebaseIndexer.CodeChunk;
-import com.sdlcraft.backend.memory.VectorSearchResult;
-import com.sdlcraft.backend.memory.VectorStore;
+import com.sdlcraft.backend.memory.SimpleCodebaseIndexer;
+import com.sdlcraft.backend.memory.SimpleCodebaseIndexer.CodeChunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,12 +30,10 @@ public class RAGService {
     private static final int DEFAULT_CONTEXT_CHUNKS = 5;
     private static final int MAX_CONTEXT_LENGTH = 8000;
     
-    private final VectorStore vectorStore;
     private final LLMProvider llmProvider;
-    private final CodebaseIndexer codebaseIndexer;
+    private final SimpleCodebaseIndexer codebaseIndexer;
     
-    public RAGService(VectorStore vectorStore, LLMProvider llmProvider, CodebaseIndexer codebaseIndexer) {
-        this.vectorStore = vectorStore;
+    public RAGService(LLMProvider llmProvider, SimpleCodebaseIndexer codebaseIndexer) {
         this.llmProvider = llmProvider;
         this.codebaseIndexer = codebaseIndexer;
     }
@@ -89,26 +85,22 @@ public class RAGService {
         logger.info("Processing focused RAG query on file: {}", targetFile);
         
         try {
-            // Retrieve code from specific file
-            List<CodeChunk> fileChunks = codebaseIndexer.retrieveFromFile(targetFile, 10);
+            // Get the target file directly
+            List<CodeChunk> combinedChunks = new ArrayList<>();
+            
+            codebaseIndexer.getFile(targetFile).ifPresent(content -> {
+                String language = targetFile.substring(targetFile.lastIndexOf(".") + 1);
+                combinedChunks.add(new CodeChunk(targetFile, language, 1, 
+                        content.split("\n").length, content));
+            });
             
             // Also get related context
             List<CodeChunk> relatedChunks = retrieveContext(query);
-            
-            // Combine and deduplicate
             Set<String> seenFiles = new HashSet<>();
-            List<CodeChunk> combinedChunks = new ArrayList<>();
-            
-            for (CodeChunk chunk : fileChunks) {
-                String key = chunk.getFilePath() + ":" + chunk.getStartLine();
-                if (seenFiles.add(key)) {
-                    combinedChunks.add(chunk);
-                }
-            }
+            seenFiles.add(targetFile);
             
             for (CodeChunk chunk : relatedChunks) {
-                String key = chunk.getFilePath() + ":" + chunk.getStartLine();
-                if (seenFiles.add(key) && combinedChunks.size() < 10) {
+                if (seenFiles.add(chunk.getFilePath()) && combinedChunks.size() < 10) {
                     combinedChunks.add(chunk);
                 }
             }
@@ -138,9 +130,10 @@ public class RAGService {
     
     /**
      * Retrieve relevant code chunks for a query.
+     * Uses simple keyword matching (like micro-agent).
      */
     private List<CodeChunk> retrieveContext(String query) {
-        return codebaseIndexer.retrieveRelevantCode(query, DEFAULT_CONTEXT_CHUNKS);
+        return codebaseIndexer.getRelevantCode(query, DEFAULT_CONTEXT_CHUNKS);
     }
     
     /**
@@ -396,7 +389,6 @@ public class RAGService {
      */
     public void reindexCodebase(String projectPath) {
         logger.info("Re-indexing codebase: {}", projectPath);
-        codebaseIndexer.clearIndex();
         codebaseIndexer.indexCodebase(projectPath);
     }
     
@@ -404,9 +396,17 @@ public class RAGService {
      * Check if RAG service is available.
      */
     public boolean isAvailable() {
-        return vectorStore.isAvailable() && llmProvider.isAvailable();
+        return llmProvider.isAvailable() && codebaseIndexer.isIndexed();
+    }
+    
+    /**
+     * Get the file tree (like micro-agent).
+     */
+    public String getFileTree() {
+        return codebaseIndexer.generateAsciiTree();
     }
 }
+
 
 
 
