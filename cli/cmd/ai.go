@@ -67,6 +67,7 @@ var (
 	focusFile    string
 	dryRun       bool
 	interactive  bool
+	projectDir   string
 )
 
 func init() {
@@ -75,16 +76,30 @@ func init() {
 	aiCmd.Flags().StringVarP(&focusFile, "file", "f", "", "Focus on a specific file")
 	aiCmd.Flags().BoolVarP(&dryRun, "dry-run", "d", false, "Show what changes would be made without applying")
 	aiCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode - confirm each change")
+	aiCmd.Flags().StringVarP(&projectDir, "project", "p", "", "Path to project to analyze (default: current directory)")
 }
 
 func runAI(cmd *cobra.Command, args []string) {
 	prompt := strings.Join(args, " ")
 	
 	// Get project path
-	projectPath, err := os.Getwd()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error getting current directory: %v\n", err)
-		os.Exit(1)
+	var projectPath string
+	var err error
+	
+	if projectDir != "" {
+		// Use specified project directory
+		projectPath, err = filepath.Abs(projectDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error resolving project path: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		// Use current directory
+		projectPath, err = os.Getwd()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error getting current directory: %v\n", err)
+			os.Exit(1)
+		}
 	}
 	
 	// Create backend client
@@ -98,6 +113,13 @@ func runAI(cmd *cobra.Command, args []string) {
 		fmt.Fprintf(os.Stderr, "❌ Backend is not available at %s\n", backendURL)
 		fmt.Fprintf(os.Stderr, "   Please start the backend with: cd backend && mvn spring-boot:run\n")
 		os.Exit(1)
+	}
+	
+	// Index the project first
+	fmt.Printf("📁 Project: %s\n", projectPath)
+	fmt.Println("🔍 Indexing codebase...")
+	if err := indexProject(backendURL, projectPath); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️ Warning: Could not index project: %v\n", err)
 	}
 	
 	// Show processing message
@@ -400,8 +422,39 @@ func wrapText(text string, width int) string {
 	return strings.TrimSuffix(result, "\n")
 }
 
+func indexProject(backendURL, projectPath string) error {
+	request := map[string]string{
+		"projectPath": projectPath,
+	}
+	
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return err
+	}
+	
+	resp, err := makeHTTPRequest(backendURL+"/api/rag/index", "POST", jsonData)
+	if err != nil {
+		return err
+	}
+	
+	var result map[string]interface{}
+	if err := json.Unmarshal(resp, &result); err != nil {
+		return err
+	}
+	
+	if success, ok := result["success"].(bool); !ok || !success {
+		if errMsg, ok := result["error"].(string); ok {
+			return fmt.Errorf("%s", errMsg)
+		}
+		return fmt.Errorf("indexing failed")
+	}
+	
+	fmt.Println("✅ Codebase indexed!")
+	return nil
+}
+
 func makeHTTPRequest(url, method string, body []byte) ([]byte, error) {
-	client := &http.Client{Timeout: 120 * time.Second}
+	client := &http.Client{Timeout: 300 * time.Second} // 5 minutes for Ollama
 	
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {

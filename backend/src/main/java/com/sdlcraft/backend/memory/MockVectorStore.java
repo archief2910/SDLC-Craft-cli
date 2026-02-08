@@ -2,6 +2,7 @@ package com.sdlcraft.backend.memory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -9,10 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * Mock vector store implementation for development and testing.
+ * In-Memory vector store implementation for local development.
  * 
  * Uses in-memory storage and simple cosine similarity for search.
- * In production, replace with actual vector store (pgvector, Pinecone, etc.).
+ * Works without external vector database (Pinecone, etc.).
  * 
  * Design rationale:
  * - Enables development without external vector database
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  * - Thread-safe with ConcurrentHashMap
  */
 @Component
+@Primary
 public class MockVectorStore implements VectorStore {
     
     private static final Logger logger = LoggerFactory.getLogger(MockVectorStore.class);

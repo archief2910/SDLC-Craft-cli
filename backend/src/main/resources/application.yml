@@ -49,61 +49,18 @@ sdlcraft:
     require-confirmation-for-high-risk: true
   
   llm:
-    # Provider: "anthropic" or "openrouter"
-    provider: ${LLM_PROVIDER:anthropic}
-    
-    anthropic:
-      api-key: ${ANTHROPIC_API_KEY:}
-      model: ${ANTHROPIC_MODEL:claude-3-5-sonnet-20241022}
-    
-    openrouter:
-      api-key: ${OPENROUTER_API_KEY:}
-      model: ${LLM_MODEL:anthropic/claude-3.5-sonnet}
+    ollama:
+      base-url: http://localhost:11434
+      model: llama3.2
   
   vector-store:
     pinecone:
       api-key: ${PINECONE_API_KEY:}
       environment: ${PINECONE_ENVIRONMENT:us-east-1}
-      index: ${PINECONE_INDEX:sdlcraft-index}
-      
-  rag:
-    context-chunks: 5
-    max-context-length: 8000
-
-  # Integration configurations
-  integration:
+      index: ${PINECONE_INDEX:quickstart}
+  
+  integrations:
     jira:
       url: ${JIRA_URL:}
       email: ${JIRA_EMAIL:}
-      token: ${JIRA_API_TOKEN:}
-    
-    bitbucket:
-      url: ${BITBUCKET_URL:https://api.bitbucket.org/2.0}
-      workspace: ${BITBUCKET_WORKSPACE:}
-      username: ${BITBUCKET_USERNAME:}
-      app-password: ${BITBUCKET_APP_PASSWORD:}
-    
-    aws:
-      region: ${AWS_REGION:us-east-1}
-      profile: ${AWS_PROFILE:default}
-    
-    docker:
-      registry: ${DOCKER_REGISTRY:}
-      timeout-seconds: 300
-    
-    qa:
-      test-command: ${QA_TEST_COMMAND:npm test}
-      coverage-command: ${QA_COVERAGE_COMMAND:npm run coverage}
-      coverage-threshold: ${QA_COVERAGE_THRESHOLD:80}
-      max-iterations: ${QA_MAX_ITERATIONS:20}
-      timeout-seconds: 300
-
-# Enable actuator endpoints
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,integrations
-  endpoint:
-    health:
-      show-details: always
+      token: ${JIRA_TOKEN:}

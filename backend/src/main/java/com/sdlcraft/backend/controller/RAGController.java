@@ -1,6 +1,6 @@
 package com.sdlcraft.backend.controller;
 
-import com.sdlcraft.backend.memory.CodebaseIndexer;
+import com.sdlcraft.backend.memory.SimpleCodebaseIndexer;
 import com.sdlcraft.backend.rag.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +28,9 @@ public class RAGController {
     
     private final RAGService ragService;
     private final CodeChangeService codeChangeService;
-    private final CodebaseIndexer codebaseIndexer;
+    private final SimpleCodebaseIndexer codebaseIndexer;
     
-    public RAGController(RAGService ragService, CodeChangeService codeChangeService, CodebaseIndexer codebaseIndexer) {
+    public RAGController(RAGService ragService, CodeChangeService codeChangeService, SimpleCodebaseIndexer codebaseIndexer) {
         this.ragService = ragService;
         this.codeChangeService = codeChangeService;
         this.codebaseIndexer = codebaseIndexer;
@@ -162,7 +162,7 @@ public class RAGController {
     }
     
     /**
-     * Debug endpoint to see actual code chunks retrieved from Pinecone.
+     * Debug endpoint to see actual code chunks retrieved.
      */
     @PostMapping("/debug/search")
     public ResponseEntity<Map<String, Object>> debugSearch(@RequestBody Map<String, Object> request) {
@@ -172,7 +172,7 @@ public class RAGController {
         logger.info("Debug search for: {}", query);
         
         try {
-            List<CodebaseIndexer.CodeChunk> chunks = codebaseIndexer.retrieveRelevantCode(query, limit);
+            List<SimpleCodebaseIndexer.CodeChunk> chunks = codebaseIndexer.getRelevantCode(query, limit);
             
             List<Map<String, Object>> results = chunks.stream()
                     .map(chunk -> {
