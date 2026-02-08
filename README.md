@@ -2,7 +2,7 @@
 
 **Agentic AI-Powered SDLC Automation Platform**
 
-An autonomous agent system that orchestrates your entire Software Development Life Cycle - from Jira tickets to production deployments - using iterative, test-driven AI workflows.
+An autonomous agent system that helps you manage your Software Development Life Cycle - using AI-powered code analysis, Jira integration, and iterative workflows.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -10,256 +10,244 @@ An autonomous agent system that orchestrates your entire Software Development Li
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │   ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐             │
-│   │   JIRA   │    │BITBUCKET │    │   AWS    │    │  DOCKER  │             │
-│   │ Tickets  │───▶│   Code   │───▶│  Infra   │───▶│  Deploy  │             │
-│   └────┬─────┘    └────┬─────┘    └────┬─────┘    └────┬─────┘             │
-│        │               │               │               │                    │
-│        └───────────────┴───────────────┴───────────────┘                    │
-│                               │                                              │
-│                    ┌──────────▼──────────┐                                  │
-│                    │   AGENT ORCHESTRATOR │                                  │
-│                    │  ┌────────────────┐ │                                  │
-│                    │  │ PLAN → ACT →   │ │                                  │
-│                    │  │ OBSERVE → REFLECT│ │                                  │
-│                    │  └────────────────┘ │                                  │
-│                    └──────────┬──────────┘                                  │
-│                               │                                              │
-│        ┌──────────────────────┼──────────────────────┐                      │
-│        ▼                      ▼                      ▼                      │
-│   ┌─────────┐           ┌─────────┐           ┌─────────┐                   │
-│   │ Planner │           │Executor │           │Validator│                   │
-│   │  Agent  │           │  Agent  │           │  Agent  │                   │
-│   └─────────┘           └─────────┘           └─────────┘                   │
+│   │   JIRA   │    │  CODE    │    │    AI    │    │  DEPLOY  │             │
+│   │ Tickets  │◄──▶│ Analysis │◄──▶│ Assistant│◄──▶│ Pipeline │             │
+│   └──────────┘    └──────────┘    └──────────┘    └──────────┘             │
 │                                                                              │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
 │   │                         LLM LAYER                                    │   │
-│   │   OpenRouter │ OpenAI │ Anthropic │ Ollama (Local)                  │   │
+│   │              Ollama (Local) │ Anthropic │ OpenAI                    │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
 │   │                       MEMORY & CONTEXT                               │   │
-│   │   Pinecone Vector Store │ RAG │ Codebase Index │ Execution History  │   │
+│   │          Codebase Indexer │ RAG │ File Tree │ Execution History     │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Core Workflow
+## ✨ Features
 
-SDLCraft follows the **micro-agent pattern**: iterative, test-driven execution until success.
+- 🤖 **AI Code Analysis** - Ask questions about any codebase in natural language
+- 🎫 **Jira Integration** - Create, list, transition, and comment on issues from CLI
+- 🔄 **Iterative Workflows** - Test-driven AI that retries until success
+- 🏠 **Local LLM Support** - Works offline with Ollama (no API keys needed!)
 
+## 🚀 Quick Start
+
+### Prerequisites
+
+1. **Java 17+** (JDK 21 or 25 recommended)
+2. **Go 1.21+** (for CLI)
+3. **Ollama** (for local AI) - [Download](https://ollama.ai)
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-org/SDLCraft-CLI.git
+cd SDLCraft-CLI
+
+# 2. Install and start Ollama
+ollama pull llama3.2
+ollama serve  # Keep running in background
+
+# 3. Start the backend
+cd backend
+.\run.ps1    # Windows
+./run.sh     # Linux/Mac
+
+# 4. Build the CLI
+cd ../cli
+go build -o sdlc.exe   # Windows
+go build -o sdlc       # Linux/Mac
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    ITERATIVE AGENT LOOP                         │
-│                                                                  │
-│   ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐     │
-│   │ RECEIVE │───▶│ GENERATE│───▶│  TEST   │───▶│ VERIFY  │     │
-│   │  INTENT │    │  PLAN   │    │ EXECUTE │    │ RESULT  │     │
-│   └─────────┘    └─────────┘    └─────────┘    └────┬────┘     │
-│                                                      │          │
-│                                    ┌─────────────────┤          │
-│                                    │                 │          │
-│                              ┌─────▼─────┐    ┌─────▼─────┐    │
-│                              │  FAILED   │    │  SUCCESS  │    │
-│                              │  Iterate  │    │  Complete │    │
-│                              └─────┬─────┘    └───────────┘    │
-│                                    │                            │
-│                                    └────────────────────────────┤
-│                                              ▲                  │
-│                                              │                  │
-│                              ┌───────────────┘                  │
-│                              │  Max 20 iterations               │
-│                              │  with error feedback             │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
 
-## Integrations
+## 📖 Usage
+
+### AI Code Analysis
+
+Analyze any codebase with natural language:
+
+```bash
+# Analyze current directory
+sdlc ai "explain how the authentication works"
+
+# Analyze a specific project
+sdlc ai -p /path/to/project "find all API endpoints"
+
+# Apply suggested changes
+sdlc ai --apply "add error handling to the main function"
+
+# Interactive mode - review each change
+sdlc ai -i "refactor for better performance"
+```
 
 ### Jira Integration
-```
-sdlc jira sync                    # Sync project tickets
-sdlc jira create "Bug: API 500"   # Create ticket via AI
-sdlc jira transition PROJ-123     # Auto-transition based on code state
-```
 
-### Bitbucket Integration
-```
-sdlc bb pr create                 # Create PR with AI-generated description
-sdlc bb review                    # AI-powered code review
-sdlc bb merge --when-green        # Auto-merge when CI passes
-```
-
-### AWS Integration
-```
-sdlc aws deploy staging           # Deploy to staging environment
-sdlc aws infra plan               # Generate Terraform plan
-sdlc aws scale --auto             # AI-driven auto-scaling decisions
-```
-
-### Docker Integration
-```
-sdlc docker build                 # Build with optimized Dockerfile
-sdlc docker push ecr              # Push to ECR
-sdlc docker compose up            # Start local development
-```
-
-### QA Automation
-```
-sdlc qa run                       # Execute test suite
-sdlc qa generate                  # AI-generate tests from code
-sdlc qa coverage                  # Analyze and improve coverage
-```
-
-## Quick Start
+Manage Jira tickets from the command line:
 
 ```bash
-# Configure integrations
-sdlc config set jira.url https://your-org.atlassian.net
-sdlc config set jira.token <your-token>
-sdlc config set bitbucket.url https://bitbucket.org/your-org
-sdlc config set aws.profile default
-sdlc config set llm.provider openrouter
-sdlc config set llm.key <your-api-key>
+# Check connection
+sdlc jira status
 
-# Start automating
-sdlc ai "pick up PROJ-123, implement the feature, create PR, deploy to staging"
+# List projects
+sdlc jira projects
+
+# List issues
+sdlc jira issues PROJ
+sdlc jira issues PROJ -s "In Progress"  # Filter by status
+sdlc jira issues PROJ -l 50              # Limit results
+
+# Get issue details
+sdlc jira issue PROJ-123
+
+# Create an issue
+sdlc jira create PROJ "Fix login bug" -t Bug -d "Users can't login"
+
+# Transition issue status
+sdlc jira transition PROJ-123 "In Progress"
+sdlc jira transition PROJ-123 "Done"
+
+# Add a comment
+sdlc jira comment PROJ-123 "Fixed in commit abc123"
 ```
 
-## Agent Types
+## ⚙️ Configuration
 
-| Agent | Purpose | Phase |
-|-------|---------|-------|
-| **Planner** | Analyzes intent, creates execution plan | PLAN |
-| **Executor** | Executes planned actions against integrations | ACT |
-| **Validator** | Verifies outcomes, runs tests | OBSERVE |
-| **Reflection** | Learns from failures, adjusts strategy | REFLECT |
+### Environment Variables
 
-## Tech Stack
+Create a `.env` file in the project root:
 
-| Component | Technology |
-|-----------|------------|
-| CLI | Go + Cobra |
-| Backend | Java 17 + Spring Boot 3 |
-| LLM | OpenRouter / OpenAI / Anthropic / Ollama |
-| Vector Store | Pinecone |
-| Database | PostgreSQL / H2 |
-| Containerization | Docker |
-| Cloud | AWS |
+```env
+# LLM Provider (Ollama is default - no API key needed!)
+# ANTHROPIC_API_KEY=sk-ant-...  # Optional: for Anthropic Claude
 
-## Configuration
+# Jira Integration (optional)
+JIRA_URL=https://your-org.atlassian.net
+JIRA_EMAIL=your-email@company.com
+JIRA_TOKEN=your-api-token
 
-Environment variables or `~/.sdlcraft/config.yml`:
+# Get Jira API token at: https://id.atlassian.com/manage/api-tokens
+```
+
+### application.yml
+
+Backend configuration in `backend/src/main/resources/application.yml`:
 
 ```yaml
-llm:
-  provider: openrouter
-  model: anthropic/claude-3.5-sonnet
-  api_key: ${OPENROUTER_API_KEY}
-
-jira:
-  url: https://your-org.atlassian.net
-  email: you@company.com
-  token: ${JIRA_API_TOKEN}
-
-bitbucket:
-  url: https://api.bitbucket.org/2.0
-  username: your-username
-  app_password: ${BITBUCKET_APP_PASSWORD}
-
-aws:
-  profile: default
-  region: us-east-1
-
-docker:
-  registry: your-account.dkr.ecr.us-east-1.amazonaws.com
-
-qa:
-  test_command: npm test
-  coverage_threshold: 80
+sdlcraft:
+  llm:
+    ollama:
+      base-url: http://localhost:11434
+      model: llama3.2
+  
+  integrations:
+    jira:
+      url: ${JIRA_URL:}
+      email: ${JIRA_EMAIL:}
+      token: ${JIRA_TOKEN:}
 ```
 
-## Example Workflows
-
-### 1. Full Feature Development
-```bash
-sdlc ai "implement user authentication with JWT tokens"
-```
-
-The agent will:
-1. **PLAN**: Analyze codebase, identify files to modify, plan implementation
-2. **ACT**: Generate code, create/modify files
-3. **OBSERVE**: Run tests, check for errors
-4. **REFLECT**: If tests fail, analyze errors and retry (up to 20x)
-
-### 2. Bug Fix from Jira
-```bash
-sdlc workflow bug-fix PROJ-456
-```
-
-Flow:
-```
-Jira Ticket → Analyze Bug → Generate Fix → Test → Create PR → Request Review
-```
-
-### 3. Release Pipeline
-```bash
-sdlc workflow release v1.2.0
-```
-
-Flow:
-```
-Version Bump → Changelog → Build → Test → Docker Push → Deploy Staging → Smoke Tests → Deploy Production
-```
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 SDLCraft-CLI/
 ├── cli/                      # Go CLI application
-│   ├── cmd/                  # Command implementations
-│   │   ├── root.go
-│   │   ├── ai.go            # Natural language commands
-│   │   ├── jira.go          # Jira integration commands
-│   │   ├── bitbucket.go     # Bitbucket commands
-│   │   ├── aws.go           # AWS commands
-│   │   ├── docker.go        # Docker commands
-│   │   └── qa.go            # QA automation commands
-│   ├── client/              # HTTP client for backend
-│   ├── parser/              # Intent parsing & repair
-│   └── renderer/            # Terminal UI rendering
+│   ├── cmd/
+│   │   ├── root.go          # Root command
+│   │   ├── ai.go            # AI code analysis
+│   │   └── jira.go          # Jira commands
+│   └── client/              # HTTP client for backend
 │
 ├── backend/                  # Java Spring Boot backend
 │   └── src/main/java/com/sdlcraft/backend/
-│       ├── agent/           # Multi-agent orchestration
-│       │   ├── PlannerAgent.java
-│       │   ├── ExecutorAgent.java
-│       │   ├── ValidatorAgent.java
-│       │   └── ReflectionAgent.java
-│       ├── integration/     # External service integrations
-│       │   ├── jira/
-│       │   ├── bitbucket/
-│       │   ├── aws/
-│       │   ├── docker/
-│       │   └── qa/
-│       ├── llm/             # LLM providers
-│       ├── memory/          # Vector store & RAG
-│       └── workflow/        # Workflow definitions
+│       ├── llm/             # LLM providers (Ollama, Anthropic)
+│       ├── rag/             # RAG service for code analysis
+│       ├── memory/          # Codebase indexing
+│       └── integration/     # External integrations
+│           └── jira/        # Jira service
 │
-└── config/                   # Configuration templates
+├── .env                      # Environment variables
+└── README.md
 ```
 
-## Development
+## 🔧 Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| CLI | Go + Cobra |
+| Backend | Java 21 + Spring Boot 3 |
+| LLM | Ollama (local) / Anthropic |
+| Database | H2 (embedded) |
+| Code Indexing | File-based (no external vector DB) |
+
+## 💡 Examples
+
+### 1. Code Understanding
 
 ```bash
-# Backend
-cd backend && ./mvnw spring-boot:run
+# Understand how something works
+sdlc ai "how does the payment processing work?"
 
-# CLI
-cd cli && go build -o sdlc && ./sdlc --help
+# Find specific functionality
+sdlc ai "where is user authentication implemented?"
+
+# Get suggestions
+sdlc ai "how can I improve error handling in this project?"
 ```
 
-## License
+### 2. Code Modifications
+
+```bash
+# Add new functionality
+sdlc ai --apply "add input validation to the user registration"
+
+# Fix issues
+sdlc ai --apply "fix the null pointer exception in UserService"
+
+# Refactor code
+sdlc ai --dry-run "refactor duplicate code in the API handlers"
+```
+
+### 3. SDLC Workflow
+
+```bash
+# Create issue for a bug you found
+sdlc jira create PROJ "Bug: Login fails with special characters" -t Bug
+
+# Start working on it
+sdlc jira transition PROJ-1 "In Progress"
+
+# Analyze and fix
+sdlc ai -p ./src "find and fix the login bug with special characters"
+
+# Mark as done
+sdlc jira comment PROJ-1 "Fixed - special characters are now escaped"
+sdlc jira transition PROJ-1 "Done"
+```
+
+## 🛠️ Development
+
+```bash
+# Run backend in development
+cd backend
+mvn spring-boot:run
+
+# Build CLI
+cd cli
+go build -o sdlc
+
+# Run tests
+cd backend && mvn test
+cd cli && go test ./...
+```
+
+## 📝 License
 
 MIT
 
+---
+
+**Made with ❤️ for developers who want AI-powered SDLC automation**
