@@ -2,7 +2,7 @@
 
 **Agentic AI-Powered SDLC Automation Platform**
 
-An autonomous agent system that helps you manage your Software Development Life Cycle - using AI-powered code analysis, Jira integration, and iterative workflows.
+An autonomous agent system that helps you manage your Software Development Life Cycle - using AI-powered code analysis, Jira & GitHub integration, and iterative workflows.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -10,8 +10,8 @@ An autonomous agent system that helps you manage your Software Development Life 
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │   ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐             │
-│   │   JIRA   │    │  CODE    │    │    AI    │    │  DEPLOY  │             │
-│   │ Tickets  │◄──▶│ Analysis │◄──▶│ Assistant│◄──▶│ Pipeline │             │
+│   │   JIRA   │    │  GITHUB  │    │    AI    │    │  DEPLOY  │             │
+│   │ Tickets  │◄──▶│ PRs/Code │◄──▶│ Assistant│◄──▶│ Pipeline │             │
 │   └──────────┘    └──────────┘    └──────────┘    └──────────┘             │
 │                                                                              │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
@@ -31,6 +31,7 @@ An autonomous agent system that helps you manage your Software Development Life 
 
 - 🤖 **AI Code Analysis** - Ask questions about any codebase in natural language
 - 🎫 **Jira Integration** - Create, list, transition, and comment on issues from CLI
+- 🐙 **GitHub Integration** - Manage repos, PRs, issues, branches, and commits
 - 🔄 **Iterative Workflows** - Test-driven AI that retries until success
 - 🏠 **Local LLM Support** - Works offline with Ollama (no API keys needed!)
 
@@ -84,7 +85,7 @@ sdlc ai --apply "add error handling to the main function"
 sdlc ai -i "refactor for better performance"
 ```
 
-### Jira Integration
+### 🎫 Jira Integration
 
 Manage Jira tickets from the command line:
 
@@ -98,20 +99,89 @@ sdlc jira projects
 # List issues
 sdlc jira issues PROJ
 sdlc jira issues PROJ -s "In Progress"  # Filter by status
-sdlc jira issues PROJ -l 50              # Limit results
 
 # Get issue details
 sdlc jira issue PROJ-123
 
 # Create an issue
-sdlc jira create PROJ "Fix login bug" -t Bug -d "Users can't login"
+sdlc jira create PROJ "Fix login bug" -t Bug -d "Description"
 
 # Transition issue status
 sdlc jira transition PROJ-123 "In Progress"
-sdlc jira transition PROJ-123 "Done"
 
 # Add a comment
 sdlc jira comment PROJ-123 "Fixed in commit abc123"
+```
+
+### 🐙 GitHub Integration
+
+Manage GitHub repositories, PRs, and issues:
+
+```bash
+# Check connection
+sdlc gh status
+
+# List your repositories
+sdlc gh repos
+sdlc gh repos -t private -l 50  # Filter by type, limit
+
+# Get repo details
+sdlc gh repo owner/repo
+
+# List and manage pull requests
+sdlc gh prs owner/repo
+sdlc gh prs owner/repo -s closed  # Show closed PRs
+sdlc gh pr owner/repo 123         # Get PR details (shows merge status)
+sdlc gh pr-create owner/repo "Add feature" -H feature-branch -B main
+
+# Check merge conflicts before merging
+sdlc gh pr-status owner/repo 123  # Shows conflicts & files changed
+sdlc gh pr-merge owner/repo 123   # Merges (or shows conflict resolution steps)
+
+# List and manage issues
+sdlc gh issues owner/repo
+sdlc gh issues owner/repo -s all  # Show all issues
+sdlc gh issue-create owner/repo "Bug: Login fails" -l bug,urgent
+sdlc gh issue-close owner/repo 45
+
+# Add comments
+sdlc gh comment owner/repo 123 "This is fixed now"
+
+# View branches and commits
+sdlc gh branches owner/repo
+sdlc gh commits owner/repo -b main -l 20
+```
+
+#### Merge Conflict Detection
+
+SDLCraft checks for merge conflicts before merging:
+
+```bash
+# Check if a PR can be merged
+sdlc gh pr-status owner/repo 123
+
+# Output:
+# ═══════════════════════════════════════════════════════════════
+# 🔀 Merge Status for PR #123
+# ═══════════════════════════════════════════════════════════════
+#
+# 🌿 feature-branch → main
+#
+# ❌ Status: Has merge conflicts
+#
+# 📄 Files changed (3):
+#    ✏️ src/main.go (+45/-12)
+#    ➕ src/utils.go (+30/-0)
+#    ✏️ config.yml (+5/-2)
+#
+# 🔧 To resolve conflicts locally:
+#    git checkout main
+#    git pull
+#    git merge origin/feature-branch
+#    # Resolve conflicts in your editor
+#    git add .
+#    git commit
+#    git push
 ```
 
 ## ⚙️ Configuration
@@ -127,28 +197,25 @@ Create a `.env` file in the project root:
 # Jira Integration (optional)
 JIRA_URL=https://your-org.atlassian.net
 JIRA_EMAIL=your-email@company.com
-JIRA_TOKEN=your-api-token
+JIRA_TOKEN=your-jira-api-token
 
-# Get Jira API token at: https://id.atlassian.com/manage/api-tokens
+# GitHub Integration (optional)
+GITHUB_TOKEN=ghp_your_github_token
+GITHUB_USERNAME=your-github-username  # Optional
 ```
 
-### application.yml
+### Getting API Tokens
 
-Backend configuration in `backend/src/main/resources/application.yml`:
+**Jira Token:**
+1. Go to: https://id.atlassian.com/manage/api-tokens
+2. Click "Create API token"
+3. Copy and add to `.env`
 
-```yaml
-sdlcraft:
-  llm:
-    ollama:
-      base-url: http://localhost:11434
-      model: llama3.2
-  
-  integrations:
-    jira:
-      url: ${JIRA_URL:}
-      email: ${JIRA_EMAIL:}
-      token: ${JIRA_TOKEN:}
-```
+**GitHub Token:**
+1. Go to: https://github.com/settings/tokens
+2. Generate new token (classic)
+3. Select scopes: `repo`, `read:user`
+4. Copy and add to `.env`
 
 ## 📁 Project Structure
 
@@ -158,7 +225,8 @@ SDLCraft-CLI/
 │   ├── cmd/
 │   │   ├── root.go          # Root command
 │   │   ├── ai.go            # AI code analysis
-│   │   └── jira.go          # Jira commands
+│   │   ├── jira.go          # Jira commands
+│   │   └── github.go        # GitHub commands
 │   └── client/              # HTTP client for backend
 │
 ├── backend/                  # Java Spring Boot backend
@@ -167,7 +235,8 @@ SDLCraft-CLI/
 │       ├── rag/             # RAG service for code analysis
 │       ├── memory/          # Codebase indexing
 │       └── integration/     # External integrations
-│           └── jira/        # Jira service
+│           ├── jira/        # Jira service
+│           └── github/      # GitHub service
 │
 ├── .env                      # Environment variables
 └── README.md
@@ -185,47 +254,67 @@ SDLCraft-CLI/
 
 ## 💡 Examples
 
-### 1. Code Understanding
+### 1. Complete SDLC Workflow
 
 ```bash
-# Understand how something works
-sdlc ai "how does the payment processing work?"
+# 1. Create a Jira issue for your task
+sdlc jira create PROJ "Implement user authentication" -t Story
 
-# Find specific functionality
-sdlc ai "where is user authentication implemented?"
+# 2. Start working on it
+sdlc jira transition PROJ-42 "In Progress"
 
-# Get suggestions
-sdlc ai "how can I improve error handling in this project?"
+# 3. Analyze existing code
+sdlc ai -p ./src "how is authentication currently handled?"
+
+# 4. Get AI suggestions
+sdlc ai --apply "add JWT authentication to the login endpoint"
+
+# 5. Create a GitHub PR
+sdlc gh pr-create myorg/myrepo "Add JWT authentication" -H feature/jwt-auth -B main
+
+# 6. Link and update Jira
+sdlc jira comment PROJ-42 "PR created: https://github.com/myorg/myrepo/pull/123"
+
+# 7. After review, merge the PR
+sdlc gh pr-merge myorg/myrepo 123
+
+# 8. Close the Jira issue
+sdlc jira transition PROJ-42 "Done"
 ```
 
-### 2. Code Modifications
+### 2. Code Review Workflow
 
 ```bash
-# Add new functionality
-sdlc ai --apply "add input validation to the user registration"
+# View open PRs
+sdlc gh prs myorg/myrepo
 
-# Fix issues
-sdlc ai --apply "fix the null pointer exception in UserService"
+# Check PR details
+sdlc gh pr myorg/myrepo 45
 
-# Refactor code
-sdlc ai --dry-run "refactor duplicate code in the API handlers"
+# Analyze the codebase for context
+sdlc ai -p ./myrepo "explain the changes in the auth module"
+
+# Leave a comment
+sdlc gh comment myorg/myrepo 45 "LGTM! Great refactoring."
+
+# Merge when ready
+sdlc gh pr-merge myorg/myrepo 45
 ```
 
-### 3. SDLC Workflow
+### 3. Bug Fixing Workflow
 
 ```bash
-# Create issue for a bug you found
-sdlc jira create PROJ "Bug: Login fails with special characters" -t Bug
+# Find the bug in code
+sdlc ai "why does the login fail with special characters?"
 
-# Start working on it
-sdlc jira transition PROJ-1 "In Progress"
+# Create a GitHub issue
+sdlc gh issue-create myorg/myrepo "Bug: Login fails with special chars" -l bug
 
-# Analyze and fix
-sdlc ai -p ./src "find and fix the login bug with special characters"
+# Fix with AI assistance
+sdlc ai --apply "escape special characters in the login form"
 
-# Mark as done
-sdlc jira comment PROJ-1 "Fixed - special characters are now escaped"
-sdlc jira transition PROJ-1 "Done"
+# Close the issue
+sdlc gh issue-close myorg/myrepo 67
 ```
 
 ## 🛠️ Development
@@ -243,6 +332,16 @@ go build -o sdlc
 cd backend && mvn test
 cd cli && go test ./...
 ```
+
+## 🗺️ Roadmap
+
+- [x] AI-powered code analysis (RAG)
+- [x] Jira integration
+- [x] GitHub integration
+- [ ] Docker integration
+- [ ] AWS deployment integration
+- [ ] CI/CD pipeline integration
+- [ ] Slack/Teams notifications
 
 ## 📝 License
 

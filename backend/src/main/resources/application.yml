@@ -64,3 +64,6 @@ sdlcraft:
       url: ${JIRA_URL:}
       email: ${JIRA_EMAIL:}
       token: ${JIRA_TOKEN:}
+    github:
+      token: ${GITHUB_TOKEN:}
+      username: ${GITHUB_USERNAME:}

@@ -1,4 +1,4 @@
-# SDLCraft Backend Startup Script (Ollama + Jira)
+# SDLCraft Backend Startup Script (Ollama + Integrations)
 $env:JAVA_HOME = "C:\Program Files\Java\jdk-25"
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
@@ -18,21 +18,28 @@ if (Test-Path $envFile) {
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "   SDLCraft Backend (Ollama + Jira)" -ForegroundColor Cyan  
+Write-Host "   SDLCraft Backend" -ForegroundColor Cyan  
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Make sure Ollama is running: " -NoNewline
 Write-Host "ollama serve" -ForegroundColor Yellow
 Write-Host ""
 
-# Show Jira status
+# Show integrations status
+Write-Host "Integrations:" -ForegroundColor White
+
 if ($env:JIRA_URL) {
-    Write-Host "Jira: " -NoNewline
-    Write-Host $env:JIRA_URL -ForegroundColor Green
+    Write-Host "  Jira:   $env:JIRA_URL" -ForegroundColor Green
 } else {
-    Write-Host "Jira: " -NoNewline
-    Write-Host "Not configured" -ForegroundColor Yellow
+    Write-Host "  Jira:   Not configured" -ForegroundColor DarkGray
 }
+
+if ($env:GITHUB_TOKEN) {
+    Write-Host "  GitHub: Configured" -ForegroundColor Green
+} else {
+    Write-Host "  GitHub: Not configured" -ForegroundColor DarkGray
+}
+
 Write-Host ""
 
 mvn spring-boot:run
